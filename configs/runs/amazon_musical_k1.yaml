@@ -1,0 +1,2 @@
+# DGP+ on amazon_musical, K = 1.
+defaults: [../datasets/amazon_musical.yaml, _k1.yaml]

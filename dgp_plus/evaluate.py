@@ -7,10 +7,12 @@ predict fraud if p > t, first best wins. Values are percentages, and std is the 
 from __future__ import annotations
 
 import numpy as np
+from scipy import stats
 from sklearn.metrics import average_precision_score, f1_score, roc_auc_score
 
 METRICS = ("macro_f1", "auroc", "auprc")
 THRESHOLDS = np.linspace(0.05, 0.95, 19)
+MIN_PAIRED_SEEDS = 5      # fewer pairs than this are reported as n/a
 BOOTSTRAP_ROUNDS = 2000
 
 
@@ -79,6 +81,19 @@ def paired_bootstrap(labels: np.ndarray, runs_a: list[np.ndarray], runs_b: list[
                 [macro_f1_at(labels[index], a[index], ta) - macro_f1_at(labels[index], b[index], tb)
                  for a, b, ta, tb in zip(runs_a, runs_b, thresholds_a, thresholds_b)])))
     return {m: [float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5))] for m, v in differences.items()}
+
+
+def paired_test(scores_a: dict[int, float], scores_b: dict[int, float]) -> dict:
+    """Mean difference a - b, seeds better and paired t over the seeds both arms have.
+
+    With fewer than MIN_PAIRED_SEEDS pairs, delta, better and p are None, so a partial arm is never reported as a result.
+    """
+    seeds = sorted(set(scores_a) & set(scores_b))
+    if len(seeds) < MIN_PAIRED_SEEDS:
+        return {"seeds": seeds, "delta": None, "better": None, "p": None}
+    a, b = np.array([scores_a[s] for s in seeds]), np.array([scores_b[s] for s in seeds])
+    return {"seeds": seeds, "delta": float((a - b).mean()), "better": int((a > b).sum()),
+            "p": float(stats.ttest_rel(a, b).pvalue)}
 
 
 def holm(p_values: dict[str, float]) -> dict[str, float]:

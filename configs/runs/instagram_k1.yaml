@@ -1,0 +1,2 @@
+# DGP+ on instagram, K = 1.
+defaults: [../datasets/instagram.yaml, _k1.yaml]

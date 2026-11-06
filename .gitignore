@@ -2,10 +2,20 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.DS_Store
 .env
 
-# Never committed: datasets have their own terms, and everything under runs/ is regenerated.
-data/
-runs/
-logs/
-baseline/
+# Generated or data-derived. Anchored, so configs/runs/ stays tracked.
+/data/
+/runs/
+/logs/
+/baseline/
+*.bundle
+
+# Model weights
+checkpoints/
+*.safetensors
+adapter_config.json
+adapter_model.bin

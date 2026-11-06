@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite this repository and the DGP paper."
+title: "DGP+"
+type: software
+authors:
+  - family-names: Bheesetti
+    given-names: Manohar Naidu
+repository-code: "https://github.com/ManoharNaidu/DGP-Plus"
+license: MIT
+references:
+  - type: conference-paper
+    title: "DGP: A Dual-Granularity Prompting Framework for Fraud Detection with Graph-Enhanced LLMs"
+    authors:
+      - family-names: Li
+        given-names: Yuan
+      - family-names: Hu
+        given-names: Jun
+      - family-names: Hooi
+        given-names: Bryan
+      - family-names: He
+        given-names: Bingsheng
+      - family-names: Chen
+        given-names: Cheng
+    collection-title: "Proceedings of the AAAI Conference on Artificial Intelligence (AAAI-26)"
+    year: 2026
+    start: 15171
+    end: 15177

@@ -1,4 +1,4 @@
-"""Compare DGP+ with a baseline per dataset, and K = 1 with K = 2. Writes runs/results/comparison.md and .json.
+"""Compare DGP+ with a baseline per dataset, and K = 1 with K = 2. Writes docs/DGP_PLUS_RESULTS.md and docs/dgp_plus_results.json.
 
     python scripts/compare_arms.py --baseline baseline/
     python scripts/compare_arms.py --baseline baseline/ --datasets instagram reddit
@@ -17,10 +17,9 @@ from pathlib import Path
 
 import _common  # noqa: F401  (puts the package on the path)
 import numpy as np
-from scipy import stats
 
 from dgp_plus.config import config_hash, load_config
-from dgp_plus.evaluate import METRICS, aggregate, holm, paired_bootstrap
+from dgp_plus.evaluate import MIN_PAIRED_SEEDS, METRICS, aggregate, holm, paired_bootstrap, paired_test
 
 ROOT = Path(__file__).resolve().parents[1]
 SEEDS = range(5)
@@ -60,11 +59,8 @@ def plus_arm(config: Path, rule: str | None = None) -> dict:
 
 
 def compare(arm: dict, reference: dict, metric: str) -> dict:
-    seeds = sorted(set(arm) & set(reference))
-    a = np.array([arm[s][0]["test"][metric] for s in seeds])
-    b = np.array([reference[s][0]["test"][metric] for s in seeds])
-    return {"seeds": seeds, "delta": float((a - b).mean()), "better": int((a > b).sum()),
-            "p": float(stats.ttest_rel(a, b).pvalue) if len(seeds) > 1 else None}
+    return paired_test({s: run[0]["test"][metric] for s, run in arm.items()},
+                       {s: run[0]["test"][metric] for s, run in reference.items()})
 
 
 def row(arm: dict) -> dict:
@@ -82,7 +78,8 @@ def main():
     args = made.parse_args()
     lines = ["# DGP+ results", "", "Test set, mean ± population std over seeds 0-4. Epoch and threshold chosen on validation only.",
              "Δ = arm − reference, mean over paired seeds. CI = paired bootstrap 95% over test nodes, 2,000 rounds.",
-             "p = paired t over seeds. Holm is applied over all tests of one dataset.", ""]
+             "p = paired t over seeds. Holm is applied over all tests of one dataset.",
+             f"A comparison with fewer than {MIN_PAIRED_SEEDS} paired seeds is shown as n/a.", ""]
     output = {}
     for dataset in args.datasets:
         plus = {f"DGP+ K={k}": plus_arm(ROOT / "configs" / "runs" / f"{dataset}_k{k}.yaml") for k in (1, 2)}
@@ -90,7 +87,7 @@ def main():
                    for rule in ("loss_es2", "auroc_all")}
         baseline = load_arm(str(args.baseline / dataset / "seed{s}"))
         lines += [f"## {dataset}", "", "| Arm | Seeds | Macro-F1 | AUROC | AUPRC | Mean prompt tokens |", "|---|---|---|---|---|---|",
-                  f"| Baseline | {len(baseline)} | {cell(row(baseline))} | |"]
+                  f"| DGP reproduced | {len(baseline)} | {cell(row(baseline))} | |"]
         for name, arm in {**plus, **tracked}.items():
             if not arm:
                 lines.append(f"| {name} | 0 | not finished | | | |")
@@ -105,15 +102,17 @@ def main():
         for name, arm in plus.items():
             if not arm:
                 continue
-            for reference_name, reference, metrics in [("baseline", baseline, METRICS),
+            for reference_name, reference, metrics in [("DGP reproduced", baseline, METRICS),
                                                        *([("DGP+ K=2", plus["DGP+ K=2"], METRICS)] if name == "DGP+ K=1" and plus["DGP+ K=2"] else [])]:
                 seeds = sorted(set(arm) & set(reference))
-                labels = arm[seeds[0]][1]
-                if not all(np.array_equal(labels, reference[s][1]) for s in seeds):
-                    raise SystemExit(f"{dataset}: {name} and {reference_name} do not share test nodes")
-                ci = paired_bootstrap(labels, [arm[s][2] for s in seeds], [reference[s][2] for s in seeds],
-                                      [arm[s][0]["test"]["threshold"] for s in seeds],
-                                      [reference[s][0]["test"]["threshold"] for s in seeds])
+                ci = {}
+                if len(seeds) >= MIN_PAIRED_SEEDS:
+                    labels = arm[seeds[0]][1]
+                    if not all(np.array_equal(labels, reference[s][1]) for s in seeds):
+                        raise SystemExit(f"{dataset}: {name} and {reference_name} do not share test nodes")
+                    ci = paired_bootstrap(labels, [arm[s][2] for s in seeds], [reference[s][2] for s in seeds],
+                                          [arm[s][0]["test"]["threshold"] for s in seeds],
+                                          [reference[s][0]["test"]["threshold"] for s in seeds])
                 for metric in metrics:
                     result = compare(arm, reference, metric)
                     test = {"arm": name, "reference": reference_name, "metric": metric, **result, "ci95": ci.get(metric)}
@@ -128,14 +127,12 @@ def main():
             corrected = adjusted.get(str(index))
             test["holm"] = corrected
             shown = f"{corrected:.4f}" if corrected is not None else "n/a"
-            lines.append(f"| {test['arm']} | {test['reference']} | {LABEL[test['metric']]} | {test['delta']:+.2f} "
-                         f"({test['better']}/{len(test['seeds'])}) | {interval} | {p} | {shown} |")
+            delta = f"{test['delta']:+.2f} ({test['better']}/{len(test['seeds'])})" if test["delta"] is not None else "n/a"
+            lines.append(f"| {test['arm']} | {test['reference']} | {LABEL[test['metric']]} | {delta} | {interval} | {p} | {shown} |")
         lines.append("")
         output[dataset] = tests
-    results = ROOT / "runs" / "results"
-    results.mkdir(parents=True, exist_ok=True)
-    (results / "comparison.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (results / "comparison.json").write_text(json.dumps(output, indent=2), encoding="utf-8")
+    (ROOT / "docs" / "DGP_PLUS_RESULTS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (ROOT / "docs" / "dgp_plus_results.json").write_text(json.dumps(output, indent=2), encoding="utf-8")
     print("\n".join(lines))
 
 

@@ -1,0 +1,2 @@
+# DGP+ on yelpchi, K = 2.
+defaults: [../datasets/yelpchi.yaml]
