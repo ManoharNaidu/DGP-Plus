@@ -1,0 +1,2 @@
+# DGP+ on amazonvideo, K = 2.
+defaults: [../datasets/amazonvideo.yaml]

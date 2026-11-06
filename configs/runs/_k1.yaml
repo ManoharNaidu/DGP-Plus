@@ -1,0 +1,2 @@
+# DGP+ change: metapaths and diffusion up to one hop. The K = 2 runs leave this out.
+dgp: {K: 1}

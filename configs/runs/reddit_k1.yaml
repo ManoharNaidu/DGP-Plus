@@ -1,0 +1,2 @@
+# DGP+ on reddit, K = 1.
+defaults: [../datasets/reddit.yaml, _k1.yaml]

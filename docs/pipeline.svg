@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 372" width="1040" height="372" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
+  <title id="t">DGP+ pipeline</title>
+  <desc id="d">Ten stages from graph and text to test metrics. DGP+ changes metapaths, LLM summaries, the LoRA classifier and the epoch choice.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b6470"/></marker>
+    <style>
+      .b{fill:#f3f5f8;stroke:#a9b2bd;stroke-width:1.5}
+      .c{fill:#dbeafe;stroke:#1d4ed8;stroke-width:2.5}
+      .n{font-size:13px;fill:#5b6470}
+      .l{font-size:15px;font-weight:600;fill:#17202b}
+      .s{font-size:12px;fill:#3f4a57}
+      .e{stroke:#5b6470;stroke-width:1.6;fill:none;marker-end:url(#a)}
+    </style>
+  </defs>
+  <rect width="1040" height="372" fill="#ffffff"/>
+  <g text-anchor="middle">
+    <rect class="b" x="20" y="24" width="176" height="104" rx="8"/><text class="n" x="108" y="48">1</text><text class="l" x="108" y="76">Graph + text</text><text class="s" x="108" y="100">nodes, relations, text</text>
+    <rect class="c" x="224" y="24" width="176" height="104" rx="8"/><text class="n" x="312" y="48">2</text><text class="l" x="312" y="76">Metapaths</text><text class="s" x="312" y="100">K = 1 (was K = 2)</text>
+    <rect class="b" x="428" y="24" width="176" height="104" rx="8"/><text class="n" x="516" y="48">3</text><text class="l" x="516" y="76">MDK trimming</text><text class="s" x="516" y="100">top-M = 4 neighbours</text>
+    <rect class="c" x="632" y="24" width="176" height="104" rx="8"/><text class="n" x="720" y="48">4</text><text class="l" x="720" y="76">LLM summaries</text><text class="s" x="720" y="100">Gemma-2-9B writer</text>
+    <rect class="b" x="836" y="24" width="184" height="104" rx="8"/><text class="n" x="928" y="48">5</text><text class="l" x="928" y="76">Numeric means</text><text class="s" x="928" y="100">averaged attributes</text>
+    <rect class="b" x="836" y="196" width="184" height="104" rx="8"/><text class="n" x="928" y="220">6</text><text class="l" x="928" y="248">Short prompt</text><text class="s" x="928" y="272">target + summaries</text>
+    <rect class="c" x="632" y="196" width="176" height="104" rx="8"/><text class="n" x="720" y="220">7</text><text class="l" x="720" y="248">LoRA classifier</text><text class="s" x="720" y="272">Gemma-2-9B, first token</text>
+    <rect class="c" x="428" y="196" width="176" height="104" rx="8"/><text class="n" x="516" y="220">8</text><text class="l" x="516" y="248">Epoch choice</text><text class="s" x="516" y="272">best validation AUROC</text>
+    <rect class="b" x="224" y="196" width="176" height="104" rx="8"/><text class="n" x="312" y="220">9</text><text class="l" x="312" y="248">Threshold</text><text class="s" x="312" y="272">from validation Macro-F1</text>
+    <rect class="b" x="20" y="196" width="176" height="104" rx="8"/><text class="n" x="108" y="220">10</text><text class="l" x="108" y="248">Test metrics</text><text class="s" x="108" y="272">Macro-F1, AUROC, AUPRC</text>
+  </g>
+  <path class="e" d="M196 76H222"/><path class="e" d="M400 76H426"/><path class="e" d="M604 76H630"/><path class="e" d="M808 76H834"/>
+  <path class="e" d="M928 128V194"/>
+  <path class="e" d="M836 248H810"/><path class="e" d="M632 248H606"/><path class="e" d="M428 248H402"/><path class="e" d="M224 248H198"/>
+  <rect class="c" x="20" y="332" width="22" height="16" rx="3"/><text x="50" y="345" font-size="13" fill="#17202b">Changed by DGP+</text>
+  <rect class="b" x="190" y="332" width="22" height="16" rx="3"/><text x="220" y="345" font-size="13" fill="#17202b">Same as DGP</text>
+</svg>

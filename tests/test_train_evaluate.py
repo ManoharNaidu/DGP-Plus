@@ -28,6 +28,32 @@ def test_holm():
     assert ev.holm({"a": 0.01, "b": 0.04, "c": 0.03}) == {"a": 0.03, "c": 0.06, "b": 0.06}
 
 
+def test_fewer_than_five_paired_seeds_is_not_a_result():
+    full = {seed: 80.0 + seed for seed in range(5)}
+    partial = {seed: full[seed] for seed in (0, 1)}
+    result = ev.paired_test(partial, full)
+    assert result == {"seeds": [0, 1], "delta": None, "better": None, "p": None}
+
+
+def test_delta_and_ci_agree_on_the_same_seeds_and_nodes():
+    rng = np.random.default_rng(0)
+    labels = np.array([0, 1] * 150)
+    runs_a = [np.clip(labels * 0.3 + rng.random(300) * 0.7, 0, 1) for _ in range(5)]
+    runs_b = [np.clip(labels * 0.2 + rng.random(300) * 0.8, 0, 1) for _ in range(5)]
+    auroc = lambda runs: {s: ev.compute_metrics(labels, r)["auroc"] for s, r in enumerate(runs)}   # noqa: E731
+    result = ev.paired_test(auroc(runs_a), auroc(runs_b))
+    low, high = ev.paired_bootstrap(labels, runs_a, runs_b)["auroc"]
+    assert result["seeds"] == [0, 1, 2, 3, 4] and low < result["delta"] < high
+
+
+def test_saved_scores_keep_small_values_apart(tiny_config):
+    tiny_config["training"]["max_epochs"] = 1
+    run_seed(tiny_config, build_prompts(tiny_config, "cpu"), 0, "cpu")
+    run_dir = next((Path(tiny_config["paths"]["results"]) / "raw").iterdir())
+    values = [line.rsplit(",", 1)[1] for line in (run_dir / "predictions.csv").read_text().splitlines()[1:]]
+    assert any(len(v.split(".")[-1]) > 6 for v in values)     # 6 decimals once tied every score below 5e-7
+
+
 def test_bootstrap_covers_macro_f1_with_fixed_thresholds():
     labels = np.array([0, 1] * 20)
     scores = labels * 0.6 + 0.2
