@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dgp-plus"
+version = "0.1.0"
+description = "DGP+: dual-granularity prompts for fraud detection with graph-enhanced LLMs, with one hop, Gemma-2-9B and AUROC epoch selection."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.12"
+dependencies = [
+    "torch==2.14.1", "transformers==5.19.0", "peft==0.21.2", "numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1",
+    "accelerate>=0.34", "sentencepiece>=0.2", "protobuf", "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["dgp_plus"]
+
+[tool.setuptools.package-data]
+dgp_plus = ["templates/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

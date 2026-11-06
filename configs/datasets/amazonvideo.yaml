@@ -1,0 +1,13 @@
+defaults: [../base.yaml]
+dataset:
+  name: amazonvideo
+  relations: [RUR, RPR, RSR]
+  question: Is this fraud?
+  split: {train: 1299, val: 1299, test: 7425, seed: 0}
+  expected: {nodes: 37126, edges: 9883406, frauds: 4379}
+  raw:
+    path: data/raw/amazonvideo/reviews_Amazon_Instant_Video_5.json.gz
+    url: https://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Amazon_Instant_Video_5.json.gz
+    sha256: 7816bf30c235c5261560e6ebd9ff6875c154ed15fb9827f0eded74b2c48c4f54
+    week_offset_days: 5
+    label: {min_votes: 1, threshold: 0.5}

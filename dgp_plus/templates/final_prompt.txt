@@ -1,0 +1,4 @@
+Target: {target_text}
+Metapaths:
+{metapath_blocks}
+Question: {question}

@@ -1,0 +1,10 @@
+# No numeric attributes. Deviation: a user's text joins all their reviews, up to 321,281 tokens, far
+# beyond what the model takes, so each node's source text is cut to its first 3,900 tokens before summarising.
+defaults: [../base.yaml]
+dgp: {numeric_summary: false}
+summarizer: {max_source_tokens: 3900}
+dataset:
+  name: amazon_musical
+  relations: [UPU, USU, UVU]
+  question: Is this fraud?
+  expected: {nodes: 11944, edges: 9557648, frauds: 821}

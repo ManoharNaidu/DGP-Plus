@@ -1,0 +1,10 @@
+# No numeric attributes. The longest node text is 6,156 tokens, so the input limit is raised and no
+# text is lost.
+defaults: [../base.yaml]
+dgp: {numeric_summary: false}
+summarizer: {max_input_tokens: 8192}
+dataset:
+  name: reddit
+  relations: [URU]
+  question: Is this a popular user?
+  expected: {nodes: 18389, edges: 42824, frauds: 1672}

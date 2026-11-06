@@ -1,0 +1,56 @@
+# DGP+ defaults. The method follows the DGP paper. Tags: PAPER = stated in the paper, GRID = the paper gives only a search
+# grid and this value was chosen from it, RECON = not stated in the paper, reconstructed, PLUS = a DGP+ change.
+paths:
+  data: data/processed
+  cache: runs/cache
+  results: runs/results
+
+dgp:
+  K: 2                     # GRID {1,2,3}: longest metapath and diffusion steps. The _k1 runs set 1 (PLUS)
+  M: 4                     # GRID {2,4,8,16}
+  B_node: 10               # GRID {10,20,40,80}
+  B_meta: 10               # GRID {10,20,40,80}
+  numeric_summary: true    # PAPER
+  numeric_precision: 2     # RECON
+  max_target_tokens: 1024  # RECON
+
+embedder:
+  model_id: microsoft/deberta-v3-base   # PAPER DeBERTaV3; RECON base size
+  revision: 8ccc9b6f36199bec6961081d44eb72fb3f7353f3
+  max_length: 512          # RECON
+  batch_size: 64
+
+summarizer:
+  model_id: google/gemma-2-9b-it   # PLUS: replaces Qwen3-8B
+  revision: 11c9b309abf73637e4b6f9a3fa1e92e615547819
+  attn_implementation: eager       # Gemma-2 needs eager attention
+  max_batch_tokens_sq: 67108864    # 16 x 2048^2: closes a batch before eager attention runs out of memory
+  batch_size: 16
+  max_new_tokens_factor: 4 # RECON
+  max_new_tokens_extra: 16 # RECON
+  max_input_tokens: 4096   # RECON
+
+classifier:
+  model_id: google/gemma-2-9b-it   # PLUS: replaces Qwen3-8B
+  revision: 11c9b309abf73637e4b6f9a3fa1e92e615547819
+  attn_implementation: eager
+  gradient_checkpointing: true
+  max_seq_len: 4096        # RECON
+  lora:
+    target_modules: [q_proj, k_proj, v_proj, o_proj]   # PAPER: all attention layers
+    rank: 8                # GRID {4,8,16,32}
+    alpha: 16              # RECON
+    dropout: 0.05          # GRID {0,0.05,0.1}
+
+training:
+  learning_rate: 1.0e-4    # GRID {1e-5,3e-5,1e-4}
+  batch_size: 4            # PAPER
+  max_epochs: 10           # PAPER
+  weight_decay: 0.0        # RECON
+  max_grad_norm: 1.0       # RECON
+  eval_batch_size: 8
+  save_adapter: true
+  selection_rules: [auroc_es3, loss_es2, auroc_all]   # PLUS: all 10 epochs run; the extra rules are tracked for comparison
+  primary_rule: auroc_es3   # PLUS: best validation AUROC, patience 3
+
+seeds: [0, 1, 2, 3, 4]     # PAPER five seeds; RECON their values

@@ -1,0 +1,9 @@
+defaults: [../base.yaml]
+dataset:
+  name: yelpchi
+  relations: [RUR, RSR, RTR]
+  question: Is this fraud?
+  split: {train: 1348, val: 1348, test: 13479, seed: 0}
+  expected: {nodes: 67395, edges: 17486608, frauds: 8919}
+  raw:
+    path: data/raw/yelpchi/reviews.jsonl     # original release with raw text, not YelpChi.mat

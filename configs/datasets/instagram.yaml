@@ -1,0 +1,8 @@
+# No numeric attributes.
+defaults: [../base.yaml]
+dgp: {numeric_summary: false}
+dataset:
+  name: instagram
+  relations: [UFU]
+  question: Is this a commercial user?
+  expected: {nodes: 7946, edges: 76058, frauds: 722}
